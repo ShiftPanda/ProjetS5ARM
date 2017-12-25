@@ -25,56 +25,69 @@ Contact: Guillaume.Huard@imag.fr
 #include <stdlib.h>
 
 struct registers_data {
+    uint32_t tabReg[18]; // reg[16]=cpsr reg[17]=spsr
+    uint8_t mode;
 };
 
 registers registers_create() {
-    registers r = NULL;
+    registers r = malloc(sizeof(struct registers_data));
     return r;
 }
 
 void registers_destroy(registers r) {
+    free(r);
 }
 
 uint8_t get_mode(registers r) {
-    return 0;
+    return r->mode;
 } 
 
 int current_mode_has_spsr(registers r) {
-    return 0;
+    return r->mode==3;
 }
 
 int in_a_privileged_mode(registers r) {
-    return 0;
+    return (r->mode==2 || r->mode==3);
 }
 
 uint32_t read_register(registers r, uint8_t reg) {
-    uint32_t value=0;
-    return value;
+    //uint32_t value=0;
+    return r->tabReg[reg];
 }
 
 uint32_t read_usr_register(registers r, uint8_t reg) {
     uint32_t value=0;
+    if(reg!=17)
+        value=r->tabReg[reg];
     return value;
 }
 
 uint32_t read_cpsr(registers r) {
-    uint32_t value=0;
-    return value;
+    //uint32_t value=0;
+    return r->tabReg[16];
 }
 
 uint32_t read_spsr(registers r) {
-    uint32_t value=0;
-    return value;
+    //uint32_t value=0;
+    if(current_mode_has_spsr(r))
+        return r->tabReg[17];
+    return 0;
 }
 
 void write_register(registers r, uint8_t reg, uint32_t value) {
+    r->tabReg[reg]=value;
 }
 
 void write_usr_register(registers r, uint8_t reg, uint32_t value) {
+    if(reg!=17)
+        r->tabReg[reg]=value;
 }
 
 void write_cpsr(registers r, uint32_t value) {
+    r->tabReg[16]=value;
 }
 
 void write_spsr(registers r, uint32_t value) {
+    if(current_mode_has_spsr(r))
+        r->tabReg[17]=value;
 }

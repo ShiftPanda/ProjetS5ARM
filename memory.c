@@ -25,40 +25,97 @@ Contact: Guillaume.Huard@imag.fr
 #include "util.h"
 
 struct memory_data {
+    uint8_t *M;
+    size_t taille;
+    int endian;
 };
 
 memory memory_create(size_t size, int is_big_endian) {
-    memory mem=NULL;
+    memory mem = malloc(sizeof(memory));
+    mem->M=malloc(size);
+    mem->taille=size;
+    mem->endian=is_big_endian;
     return mem;
 }
 
 size_t memory_get_size(memory mem) {
-    return 0;
+    return mem->taille;
 }
 
 void memory_destroy(memory mem) {
+    free(mem->M);
+    free(mem);
 }
 
 int memory_read_byte(memory mem, uint32_t address, uint8_t *value) {
+    if(address<=mem->taille){
+        *value=mem->M[address];
+        return 0;
+    }
     return -1;
 }
 
 int memory_read_half(memory mem, uint32_t address, uint16_t *value) {
+    if(address+1<=mem->taille){
+        if(mem->endian==1)
+            *value=(mem->M[address]<<8) + mem->M[address+1] ;
+        else
+            *value=(mem->M[address+1]<<8) + mem->M[address] ;
+        return 0;
+    }
     return -1;
 }
 
 int memory_read_word(memory mem, uint32_t address, uint32_t *value) {
+    if(address+3<=mem->taille){
+        if(mem->endian==1)
+            *value=(mem->M[address]<<24) + (mem->M[address+1]<<16) + (mem->M[address+2]<<8) + (mem->M[address+3]);
+        else
+            *value=(mem->M[address]) + (mem->M[address+1]<<8) + (mem->M[address+2]<<16) + (mem->M[address+3]<<24);
+        return 0;
+    }
     return -1;
 }
 
 int memory_write_byte(memory mem, uint32_t address, uint8_t value) {
+    if(address<=mem->taille){
+        mem->M[address]=value;
+        return 0;
+    }
     return -1;
 }
 
 int memory_write_half(memory mem, uint32_t address, uint16_t value) {
+    if(address+1<=mem->taille){
+        if(mem->endian==1){
+            mem->M[address]=(value>>8);
+            mem->M[address+1]=(value<<8)>>8;
+        }
+        else{
+            mem->M[address+1]=(value>>8);
+            mem->M[address]=(value<<8)>>8;
+        }
+        return 0;
+    }
     return -1;
 }
 
 int memory_write_word(memory mem, uint32_t address, uint32_t value) {
+     if(address+3<=mem->taille){
+        if(mem->endian==1){
+            mem->M[address]=value>>24;
+            mem->M[address+1]=(value<<8)>>24;
+            mem->M[address+2]=(value<<16)>>24;
+            mem->M[address+3]=(value<<24)>>24;
+        }
+        else{
+            mem->M[address+3]=value>>24;
+            mem->M[address+2]=(value<<8)>>24;
+            mem->M[address+1]=(value<<16)>>24;
+            mem->M[address]=(value<<24)>>24;
+        }
+        return 1;
+     }
     return -1;
 }
+

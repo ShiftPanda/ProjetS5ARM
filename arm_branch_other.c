@@ -26,9 +26,23 @@ Contact: Guillaume.Huard@imag.fr
 #include <debug.h>
 #include <stdlib.h>
 
-
+//Page 160 B,BL
 int arm_branch(arm_core p, uint32_t ins) {
-    return UNDEFINED_INSTRUCTION;
+    //L indique si c'est un branchement avec Link ou non
+    uint8_t L=get_bit(ins,24);
+    uint8_t sign=get_bit(ins,23);
+    uint32_t offset=get_bits(ins,22,0)
+    if(L){ // Si c'est un branchement avec Link (BL)
+        // On place la valeur de pc dans le reg[14] 
+        p->reg[14]=p->cycle_count; 
+    }
+    if(sign){ //Si le signe est negatif
+        p->cycle_count-=offset;
+    }
+    else{ //Si il est positif
+        p->cycle_count+=offset; 
+    }
+    return 1;
 }
 
 int arm_coprocessor_others_swi(arm_core p, uint32_t ins) {

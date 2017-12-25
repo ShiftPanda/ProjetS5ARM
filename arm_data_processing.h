@@ -25,6 +25,7 @@ Contact: Guillaume.Huard@imag.fr
 #include <stdint.h>
 #include "arm_core.h"
 
+int arm_data_processing(arm_core p, uint32_t ins); //Possiblement a supprimer
 int arm_data_processing_shift(arm_core p, uint32_t ins);
 int arm_data_processing_immediate_msr(arm_core p, uint32_t ins);
 
